@@ -3,14 +3,17 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
+app.config['DEBUG'] = False
 
 
 def tick():
     print(f'The time right now is: {datetime.now()}')
 
 
+# Set up scheduler
 scheduler = BackgroundScheduler()
-scheduler.add_job(tick, 'interval', seconds=10)
+# Runs every on every 10 second time
+scheduler.add_job(tick, 'cron', second='0-59/10')
 scheduler.start()
 
 
