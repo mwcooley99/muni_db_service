@@ -8,24 +8,33 @@ import requests
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
+
+
 app = Flask(__name__)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] =\
+app.config['SQLALCHEMY_DATABASE_URI'] = \
     'sqlite:///' + os.path.join(basedir, 'data.sqlite')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
-
 def tick():
-    # print(f'The time right now is: {datetime.now()}')
-    my_debug(f'The time right now is: {datetime.now()}')
+    # my_debug(f'The time right now is: {datetime.now()}')
+    API_KEY_511 = os.getenv('API_KEY_511')
+    url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
+    resp = requests.get(url)
+
+    resp.encoding = 'utf-8-sig'
+    json_data = resp.json()
+    my_debug(json_data)
+
+
 
 
 def my_debug(msg, fn="", fl=""):
     print(msg)
     with open("log.txt", "a+") as f:
-        f.write(msg + '\n')
+        f.write(str(msg) + '\n')
 
 
 # Set up scheduler
