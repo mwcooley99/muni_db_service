@@ -3,11 +3,20 @@ from datetime import datetime
 from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
-app.config['DEBUG'] = False
+
+
+# app.config['DEBUG'] = False
 
 
 def tick():
-    print(f'The time right now is: {datetime.now()}')
+    # print(f'The time right now is: {datetime.now()}')
+    my_debug(f'The time right now is: {datetime.now()}')
+
+
+def my_debug(msg, fn="", fl=""):
+    print(msg)
+    with open("log.txt", "a+") as f:
+        f.write(msg + '\n')
 
 
 # Set up scheduler
@@ -23,4 +32,4 @@ def hello_world():
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=False)
