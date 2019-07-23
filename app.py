@@ -17,8 +17,14 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 API_KEY_511 = os.getenv('API_KEY_511')
 url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+# app.config['SQLALCHEMY_DATABASE_URI'] = \
+#     'sqlite:///' + os.path.join(basedir, 'data.sqlite')
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = \
+#     'postgres://localhost:5432/muni_service'
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Add functionality to the app
@@ -49,7 +55,6 @@ def date_parser(date):
 
 # Helper functions
 def make_prediction(timestamp, stop_data):
-    print(stop_data)
     base = stop_data['MonitoredVehicleJourney']
     base_prediction = base['MonitoredCall']
 
@@ -68,7 +73,7 @@ def make_prediction(timestamp, stop_data):
     except TypeError:
         predict_dict['expected_arrival_time'] = predict_dict[
             'scheduled_arrival_time']
-
+    print(predict_dict)
     return Prediction(**predict_dict)
 
 
@@ -97,9 +102,9 @@ def tick(url):
 def run_scheduler():
     # Set up scheduler
     scheduler = BackgroundScheduler()
-    # Runs every on every 10 second time
 
-    scheduler.add_job(tick, 'cron', args=[url], second='0-59/10')
+    # Runs every 15 min
+    scheduler.add_job(tick, 'cron', args=[url], minute='0-59/15')
     scheduler.start()
 
 
