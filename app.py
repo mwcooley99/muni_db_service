@@ -73,7 +73,7 @@ def make_prediction(timestamp, stop_data):
     except TypeError:
         predict_dict['expected_arrival_time'] = predict_dict[
             'scheduled_arrival_time']
-    print(predict_dict)
+
     return Prediction(**predict_dict)
 
 
