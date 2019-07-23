@@ -3,7 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from datetime import datetime
+from dateutil.parser import parse as parse_date
+from pytz import timezone
 import os
 import requests
 
@@ -25,6 +26,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
 
+# Models
 class Prediction(db.Model):
     __tablename__ = 'predictions'
     id = db.Column(db.Integer, unique=True, primary_key=True,
@@ -41,25 +43,35 @@ class Prediction(db.Model):
         return f'<Stop: {self.stop_point_ref} Line: {self.line_ref}>'
 
 
+def date_parser(date):
+    return parse_date(date).astimezone(timezone('US/Pacific'))
+
+
+# Helper functions
 def make_prediction(timestamp, stop_data):
     print(stop_data)
     base = stop_data['MonitoredVehicleJourney']
     base_prediction = base['MonitoredCall']
 
     predict_dict = {
-        'response_time': timestamp,
-        'recorded_time': stop_data['RecordedAtTime'],
+        'response_time': date_parser(timestamp),
+        'recorded_time': date_parser(stop_data['RecordedAtTime']),
         'line_ref': base['LineRef'],
         'direction_ref': base['DirectionRef'],
         'stop_point_ref': base_prediction['StopPointRef'],
-        'scheduled_arrival_time': base_prediction['AimedArrivalTime'],
-        'expected_arrival_time': base_prediction['ExpectedArrivalTime']
+        'scheduled_arrival_time': date_parser(
+            base_prediction['AimedArrivalTime'])
     }
+    try:
+        predict_dict['expected_arrival_time'] = date_parser(
+            base_prediction['ExpectedArrivalTime'])
+    except TypeError:
+        predict_dict['expected_arrival_time'] = predict_dict[
+            'scheduled_arrival_time']
 
     return Prediction(**predict_dict)
 
 
-# TODO - have it save to a db instead
 def tick(url):
     # Call the API and get data
     resp = requests.get(url)
@@ -77,7 +89,18 @@ def tick(url):
     predictions = [make_prediction(response_time, d) for d in
                    prediction_results if
                    d['MonitoredVehicleJourney']['LineRef'] in routes]
-    print(predictions)
+
+    db.session.add_all(predictions)
+    db.session.commit()
+
+
+def run_scheduler():
+    # Set up scheduler
+    scheduler = BackgroundScheduler()
+    # Runs every on every 10 second time
+
+    scheduler.add_job(tick, 'cron', args=[url], second='0-59/10')
+    scheduler.start()
 
 
 def my_debug(msg, fn="", fl=""):
@@ -86,16 +109,19 @@ def my_debug(msg, fn="", fl=""):
         f.write(str(msg) + '\n')
 
 
+run_scheduler()
+
+
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, Prediction=Prediction)
+
+
+# Routes
 @app.route('/')
 def hello_world():
     return 'Hello World!'
 
 
 if __name__ == '__main__':
-    # Set up scheduler
-    scheduler = BackgroundScheduler()
-    # Runs every on every 10 second time
-    # TODO - change run time
-    scheduler.add_job(url, 'cron', second='0-59/10')
-    scheduler.start()
     app.run(debug=False)
