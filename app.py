@@ -98,7 +98,7 @@ def tick(url):
     db.session.add_all(predictions)
     db.session.commit()
 
-    print(f'commit at: {response_time}')
+    app.logger.info(f'commit at: {response_time}')
 
 
 def run_scheduler():
