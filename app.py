@@ -98,6 +98,8 @@ def tick(url):
     db.session.add_all(predictions)
     db.session.commit()
 
+    print(f'commit at: {response_time}')
+
 
 def run_scheduler():
     # Set up scheduler
@@ -125,7 +127,7 @@ def make_shell_context():
 # Routes
 @app.route('/')
 def hello_world():
-    return 'Hello World!'
+    return 'Hello World1!'
 
 
 if __name__ == '__main__':
