@@ -105,6 +105,7 @@ def tick(url):
 
     resp = requests_retry_session().get(url)
     app.logger.info(f'Response code: {resp.status_code}')
+    print(app.logger.info(f'Response code: {resp.status_code}'))
 
     try:
         resp.encoding = 'utf-8-sig'
@@ -129,6 +130,7 @@ def tick(url):
         app.logger.info(f'commit at: {response_time}')
     except KeyError:
         app.logger.error(f'There was an error: {KeyError}')
+        print(f'There was an error: {KeyError}')
 
 
 def run_scheduler():
