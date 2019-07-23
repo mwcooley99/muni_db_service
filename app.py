@@ -6,7 +6,10 @@ from flask_migrate import Migrate
 from dateutil.parser import parse as parse_date
 from pytz import timezone
 import os
+
 import requests
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -53,6 +56,26 @@ def date_parser(date):
     return parse_date(date).astimezone(timezone('US/Pacific'))
 
 
+def requests_retry_session(
+        retries=3,
+        backoff_factor=0.3,
+        status_forcelist=(500, 502, 504),
+        session=None,
+):
+    session = session or requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
+
+
 # Helper functions
 def make_prediction(timestamp, stop_data):
     base = stop_data['MonitoredVehicleJourney']
@@ -79,26 +102,33 @@ def make_prediction(timestamp, stop_data):
 
 def tick(url):
     # Call the API and get data
-    resp = requests.get(url)
-    resp.encoding = 'utf-8-sig'
-    json_data = resp.json()
 
-    # Filter the data and create objects
-    routes = ['7', '38', '14', '2', 'M', 'N', 'T', 'K']
-    response_time = json_data['ServiceDelivery']['StopMonitoringDelivery'][
-        'ResponseTimestamp']
-    prediction_results = \
-        json_data['ServiceDelivery']['StopMonitoringDelivery'][
-            'MonitoredStopVisit']
+    resp = requests_retry_session().get(url)
+    app.logger.info(f'Response code: {resp.status_code}')
 
-    predictions = [make_prediction(response_time, d) for d in
-                   prediction_results if
-                   d['MonitoredVehicleJourney']['LineRef'] in routes]
+    try:
+        resp.encoding = 'utf-8-sig'
+        json_data = resp.json()
+        print(json_data)
 
-    db.session.add_all(predictions)
-    db.session.commit()
+        # Filter the data and create objects
+        routes = ['7', '38', '14', '2', 'M', 'N', 'T', 'K']
+        response_time = json_data['ServiceDelivery']['StopMonitoringDelivery'][
+            'ResponseTimestamp']
+        prediction_results = \
+            json_data['ServiceDelivery']['StopMonitoringDelivery'][
+                'MonitoredStopVisit']
 
-    app.logger.info(f'commit at: {response_time}')
+        predictions = [make_prediction(response_time, d) for d in
+                       prediction_results if
+                       d['MonitoredVehicleJourney']['LineRef'] in routes]
+
+        db.session.add_all(predictions)
+        db.session.commit()
+
+        app.logger.info(f'commit at: {response_time}')
+    except KeyError:
+        app.logger.error(f'There was an error: {KeyError}')
 
 
 def run_scheduler():
@@ -106,7 +136,7 @@ def run_scheduler():
     scheduler = BackgroundScheduler()
 
     # Runs every 15 min
-    scheduler.add_job(tick, 'cron', args=[url], minute='0-59/15')
+    scheduler.add_job(tick, 'cron', args=[url], minute='0-59/10')
     scheduler.start()
 
 
