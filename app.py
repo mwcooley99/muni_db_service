@@ -8,10 +8,7 @@ from pytz import timezone
 import os
 
 import requests
-from requests.adapters import HTTPAdapter
-from requests.packages.urllib3.util.retry import Retry
 
-from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 
@@ -34,112 +31,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+from models import Prediction
 
-# Models
-class Prediction(db.Model):
-    __tablename__ = 'predictions'
-    id = db.Column(db.Integer, unique=True, primary_key=True,
-                   autoincrement=True)
-    response_time = db.Column(db.DateTime)
-    recorded_time = db.Column(db.DateTime)
-    line_ref = db.Column(db.String)
-    direction_ref = db.Column(db.String)
-    stop_point_ref = db.Column(db.Integer)
-    scheduled_arrival_time = db.Column(db.DateTime)
-    expected_arrival_time = db.Column(db.DateTime)
-
-    def __repr__(self):
-        return f'<Stop: {self.stop_point_ref} Line: {self.line_ref}>'
-
-
-def date_parser(date):
-    return parse_date(date).astimezone(timezone('US/Pacific'))
-
-
-def requests_retry_session(
-        retries=3,
-        backoff_factor=0.3,
-        status_forcelist=(500, 502, 504),
-        session=None,
-):
-    session = session or requests.Session()
-    retry = Retry(
-        total=retries,
-        read=retries,
-        connect=retries,
-        backoff_factor=backoff_factor,
-        status_forcelist=status_forcelist,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
-    session.mount('http://', adapter)
-    session.mount('https://', adapter)
-    return session
-
-
-# Helper functions
-def make_prediction(timestamp, stop_data):
-    base = stop_data['MonitoredVehicleJourney']
-    base_prediction = base['MonitoredCall']
-
-    predict_dict = {
-        'response_time': date_parser(timestamp),
-        'recorded_time': date_parser(stop_data['RecordedAtTime']),
-        'line_ref': base['LineRef'],
-        'direction_ref': base['DirectionRef'],
-        'stop_point_ref': base_prediction['StopPointRef'],
-        'scheduled_arrival_time': date_parser(
-            base_prediction['AimedArrivalTime'])
-    }
-    try:
-        predict_dict['expected_arrival_time'] = date_parser(
-            base_prediction['ExpectedArrivalTime'])
-    except TypeError:
-        predict_dict['expected_arrival_time'] = predict_dict[
-            'scheduled_arrival_time']
-
-    return Prediction(**predict_dict)
-
-
-def tick(url):
-    # Call the API and get data
-
-    resp = requests_retry_session().get(url)
-    app.logger.info(f'Response code: {resp.status_code}')
-    print(app.logger.info(f'Response code: {resp.status_code}'))
-
-    try:
-        resp.encoding = 'utf-8-sig'
-        json_data = resp.json()
-        print(json_data)
-
-        # Filter the data and create objects
-        routes = ['7', '38', '14', '2', 'M', 'N', 'T', 'K']
-        response_time = json_data['ServiceDelivery']['StopMonitoringDelivery'][
-            'ResponseTimestamp']
-        prediction_results = \
-            json_data['ServiceDelivery']['StopMonitoringDelivery'][
-                'MonitoredStopVisit']
-
-        predictions = [make_prediction(response_time, d) for d in
-                       prediction_results if
-                       d['MonitoredVehicleJourney']['LineRef'] in routes]
-
-        db.session.add_all(predictions)
-        db.session.commit()
-
-        app.logger.info(f'commit at: {response_time}')
-    except KeyError:
-        app.logger.error(f'There was an error: {KeyError}')
-        print(f'There was an error: {KeyError}')
-
-
-def run_scheduler():
-    # Set up scheduler
-    scheduler = BackgroundScheduler()
-
-    # Runs every 15 min
-    scheduler.add_job(tick, 'cron', args=[url], minute='0-59/10')
-    scheduler.start()
+#
+# def run_scheduler():
+#     # Set up scheduler
+#     scheduler = BackgroundScheduler()
+#
+#     # Runs every 15 min
+#     scheduler.add_job(tick, 'cron', args=[url], minute='0-59/10')
+#     scheduler.start()
 
 
 def my_debug(msg, fn="", fl=""):
@@ -148,7 +49,7 @@ def my_debug(msg, fn="", fl=""):
         f.write(str(msg) + '\n')
 
 
-run_scheduler()
+# run_scheduler()
 
 
 @app.shell_context_processor
