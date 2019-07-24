@@ -64,7 +64,7 @@ def make_prediction(timestamp, stop_data):
 def tick(url):
     # Call the API and get data
     resp = requests_retry_session().get(url)
-    print(f'Response code: {resp.status_code}')
+    app.logger.info(f'Response code: {resp.status_code}')
 
     try:
         resp.encoding = 'utf-8-sig'
@@ -86,10 +86,10 @@ def tick(url):
         db.session.commit()
 
         app.logger.info(f'commit at: {response_time}')
-        print(f'commit at: {response_time}')
+
     except KeyError:
         app.logger.error(f'There was an error: {KeyError}')
-        print(f'There was an error: {KeyError}')
+
 
 
 sched = BlockingScheduler()
