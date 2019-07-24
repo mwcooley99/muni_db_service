@@ -1,5 +1,5 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-
+from apscheduler.schedulers.blocking import BlockingScheduler
 import os
 
 import requests
@@ -63,14 +63,12 @@ def make_prediction(timestamp, stop_data):
 
 def tick(url):
     # Call the API and get data
-
     resp = requests_retry_session().get(url)
-    print(app.logger.info(f'Response code: {resp.status_code}'))
+    print(f'Response code: {resp.status_code}')
 
     try:
         resp.encoding = 'utf-8-sig'
         json_data = resp.json()
-        print(json_data)
 
         # Filter the data and create objects
         routes = ['7', '38', '14', '2', 'M', 'N', 'T', 'K']
@@ -88,19 +86,21 @@ def tick(url):
         db.session.commit()
 
         app.logger.info(f'commit at: {response_time}')
+        print(f'commit at: {response_time}')
     except KeyError:
         app.logger.error(f'There was an error: {KeyError}')
         print(f'There was an error: {KeyError}')
 
 
-sched = BackgroundScheduler()
+sched = BlockingScheduler()
 
 API_KEY_511 = os.getenv('API_KEY_511')
 url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-@sched.scheduled_job('cron', minute='0-59/10')
-def cron_job1():
-    tick(url=url)
+@sched.scheduled_job('cron', minute='0-59/4')
+def timed_job():
+    tick(url)
+
 
 sched.start()
