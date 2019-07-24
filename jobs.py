@@ -14,7 +14,7 @@ from pytz import timezone
 
 
 def date_parser(date):
-    return parse_date(date).astimezone(timezone('US/Pacific'))
+    return parse_date(date)
 
 
 def requests_retry_session(
@@ -89,7 +89,6 @@ def tick(url):
 
     except KeyError:
         app.logger.error(f'There was an error: {KeyError}')
-
 
 
 sched = BlockingScheduler()
