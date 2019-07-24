@@ -55,8 +55,9 @@ def make_prediction(timestamp, stop_data):
         predict_dict['expected_arrival_time'] = date_parser(
             base_prediction['ExpectedArrivalTime'])
     except TypeError:
-        predict_dict['expected_arrival_time'] = predict_dict[
-            'scheduled_arrival_time']
+        predict_dict['expected_arrival_time'] = None
+    except ValueError:
+        predict_dict['expected_arrival_time'] = None
 
     return Prediction(**predict_dict)
 

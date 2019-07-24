@@ -37,23 +37,10 @@ migrate = Migrate(app, db)
 from models import Prediction
 
 
-#
-# def run_scheduler():
-#     # Set up scheduler
-#     scheduler = BackgroundScheduler()
-#
-#     # Runs every 15 min
-#     scheduler.add_job(tick, 'cron', args=[url], minute='0-59/10')
-#     scheduler.start()
-
-
 def my_debug(msg, fn="", fl=""):
     print(msg)
     with open("log.txt", "a+") as f:
         f.write(str(msg) + '\n')
-
-
-# run_scheduler()
 
 
 @app.shell_context_processor
