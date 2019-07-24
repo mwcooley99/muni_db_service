@@ -3,15 +3,11 @@ from flask import Flask, send_from_directory, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
-from dateutil.parser import parse as parse_date
-from pytz import timezone
 import os
 
 from scripts.helpers import tz_conversion
 
 import pandas as pd
-
-import requests
 
 app = Flask(__name__)
 
@@ -19,12 +15,6 @@ app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 API_KEY_511 = os.getenv('API_KEY_511')
 url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = \
-#     'sqlite:///' + os.path.join(basedir, 'data.sqlite')
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = \
-#     'postgres://localhost:5432/muni_service'
 
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 

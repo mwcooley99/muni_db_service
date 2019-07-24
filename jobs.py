@@ -1,5 +1,5 @@
-from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.schedulers.blocking import BlockingScheduler
+
 import os
 
 import requests
@@ -10,7 +10,7 @@ from app import app, db
 from models import Prediction
 
 from dateutil.parser import parse as parse_date
-from pytz import timezone
+
 
 
 def date_parser(date):
