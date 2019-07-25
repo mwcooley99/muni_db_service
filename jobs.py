@@ -13,9 +13,6 @@ from dateutil.parser import parse as parse_date
 
 from scripts.helpers import make_logger
 
-import logging
-import sys
-
 
 def date_parser(date):
     return parse_date(date)
