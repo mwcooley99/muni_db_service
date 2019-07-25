@@ -101,7 +101,7 @@ API_KEY_511 = os.getenv('API_KEY_511')
 url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-@sched.scheduled_job('cron', second='0-59/10')
+@sched.scheduled_job('cron', minutes='0-59/10')
 def timed_job():
     tick(url)
 
