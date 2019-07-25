@@ -11,6 +11,10 @@ from models import Prediction
 
 from dateutil.parser import parse as parse_date
 
+from scripts.helpers import make_logger
+
+import logging
+import sys
 
 
 def date_parser(date):
@@ -55,6 +59,7 @@ def make_prediction(timestamp, stop_data):
         predict_dict['expected_arrival_time'] = date_parser(
             base_prediction['ExpectedArrivalTime'])
     except TypeError:
+        log.error(TypeError)
         predict_dict['expected_arrival_time'] = None
     except ValueError:
         predict_dict['expected_arrival_time'] = None
@@ -65,7 +70,7 @@ def make_prediction(timestamp, stop_data):
 def tick(url):
     # Call the API and get data
     resp = requests_retry_session().get(url)
-    app.logger.info(f'Response code: {resp.status_code}')
+    log.info(f'Response code: {resp.status_code}')
 
     try:
         resp.encoding = 'utf-8-sig'
@@ -86,19 +91,20 @@ def tick(url):
         db.session.add_all(predictions)
         db.session.commit()
 
-        app.logger.info(f'commit at: {response_time}')
+        log.info(f'commit at: {response_time}')
 
     except KeyError:
-        app.logger.error(f'There was an error: {KeyError}')
+        log.error(f'There was an error: {KeyError}')
 
 
+log = make_logger()
 sched = BlockingScheduler()
 
 API_KEY_511 = os.getenv('API_KEY_511')
 url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-@sched.scheduled_job('cron', minute='0-59/10')
+@sched.scheduled_job('cron', second='0-59/10')
 def timed_job():
     tick(url)
 
