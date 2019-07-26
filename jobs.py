@@ -13,6 +13,8 @@ from dateutil.parser import parse as parse_date
 
 from scripts.helpers import make_logger
 
+import pandas as pd
+
 
 def date_parser(date):
     return parse_date(date)
@@ -94,16 +96,22 @@ def tick(url):
         log.error(f'There was an error: {KeyError}')
 
 
+
+
+def hello():
+    print("Hello")
+
 log = make_logger()
-sched = BlockingScheduler()
 
-API_KEY_511 = os.getenv('API_KEY_511')
-url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
+if __name__ == "__main__":
+    sched = BlockingScheduler()
 
-
-@sched.scheduled_job('cron', minute='0-59/10')
-def timed_job():
-    tick(url)
+    API_KEY_511 = os.getenv('API_KEY_511')
+    url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-sched.start()
+    @sched.scheduled_job('cron', minute='0-59/10')
+    def timed_job():
+        tick(url)
+
+    sched.start()

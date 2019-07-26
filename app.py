@@ -1,11 +1,12 @@
-from flask import Flask, send_from_directory, make_response
+from flask import Flask, send_from_directory, make_response, jsonify
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 import os
 
-from scripts.helpers import tz_conversion
+
+from scripts.helpers import tz_conversion, generate_shame_score
 
 import pandas as pd
 
@@ -59,6 +60,11 @@ def all_data():
     resp.headers["Content-Type"] = "text/csv"
 
     return resp
+
+
+@app.route('/scores')
+def scores():
+    return jsonify(generate_shame_score())
 
 
 if __name__ == '__main__':
