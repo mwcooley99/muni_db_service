@@ -49,8 +49,7 @@ def generate_shame_score():
                .drop(labels="index", axis=1)
                .to_dict(orient='records')
                )
-    print({'results': records})
-    print("*******")
+
     return {'results': records}
 
 

@@ -43,7 +43,6 @@ def make_shell_context():
 @app.route('/')
 def hello_world():
     data = generate_shame_score()
-    print(str(data)[4700:4850])
     return render_template('index.html', data=data)
 
 
