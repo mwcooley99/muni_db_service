@@ -32,6 +32,7 @@ def generate_shame_score():
 
     group = df.groupby(['line_ref', 'direction_ref', 'stop_point_ref']).agg(
         {'min_late': 'mean'}).reset_index()
+    group.fillna('n/a', inplace=True)
 
     group['prediction_label'] = 'tisk tisk'
 
@@ -48,8 +49,9 @@ def generate_shame_score():
                .drop(labels="index", axis=1)
                .to_dict(orient='records')
                )
-
-    return records
+    print({'results': records})
+    print("*******")
+    return {'results': records}
 
 
 if __name__ == '__main__':

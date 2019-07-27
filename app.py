@@ -1,4 +1,4 @@
-from flask import Flask, send_from_directory, make_response, jsonify
+from flask import Flask, send_from_directory, make_response, jsonify, render_template
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -42,7 +42,9 @@ def make_shell_context():
 # Routes
 @app.route('/')
 def hello_world():
-    return 'Hello World2!'
+    data = generate_shame_score()
+    print(str(data)[4700:4850])
+    return render_template('index.html', data=data)
 
 
 @app.route('/data')
