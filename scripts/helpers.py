@@ -57,7 +57,7 @@ def get_shame_data():
 def generate_shame_score():
     with open('static/lookup_dictionaries.json') as f:
         d = json.load(f)
-        print(d)
+    # print(d)
 
 
 if __name__ == '__main__':

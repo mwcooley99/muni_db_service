@@ -96,10 +96,9 @@ def tick(url):
         log.error(f'There was an error: {KeyError}')
 
 
-
-
 def hello():
     print("Hello")
+
 
 log = make_logger()
 
@@ -113,5 +112,6 @@ if __name__ == "__main__":
     @sched.scheduled_job('cron', minute='0-59/10')
     def timed_job():
         tick(url)
+
 
     sched.start()
