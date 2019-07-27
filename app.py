@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 import os
 
 
-from scripts.helpers import tz_conversion, generate_shame_score
+from scripts.helpers import tz_conversion, get_shame_data
 
 import pandas as pd
 
@@ -42,7 +42,7 @@ def make_shell_context():
 # Routes
 @app.route('/')
 def hello_world():
-    data = generate_shame_score()
+    data = get_shame_data()
     return render_template('index.html', data=data)
 
 
@@ -65,7 +65,7 @@ def all_data():
 
 @app.route('/scores')
 def scores():
-    resp = make_response(jsonify(generate_shame_score()))
+    resp = make_response(jsonify(get_shame_data()))
     # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
     resp.headers["Content-Type"] = "application/json"
     resp.headers["Access-Control-Allow-Origin"] = "*"

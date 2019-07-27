@@ -23,7 +23,7 @@ def make_logger():
     return log
 
 
-def generate_shame_score():
+def get_shame_data():
     engine = create_engine(os.getenv('DATABASE_URL'))
     conn = engine.connect()
     query = "SELECT line_ref, direction_ref, stop_point_ref, Extract( EPOCH FROM (scheduled_arrival_time - expected_arrival_time)) AS min_late " \
@@ -51,6 +51,12 @@ def generate_shame_score():
                )
 
     return {'results': records}
+
+
+def generate_shame_score():
+    with open('data/lookup_dictionaries.json') as f:
+        d = json.load(f)
+        print(d)
 
 
 if __name__ == '__main__':
