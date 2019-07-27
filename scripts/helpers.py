@@ -35,7 +35,7 @@ def get_shame_data():
     group.fillna('n/a', inplace=True)
 
     group['prediction_label'] = 'tisk tisk'
-
+    generate_shame_score()
     records = (group.groupby(['stop_point_ref', 'direction_ref', 'line_ref'])[
                    ['min_late', 'prediction_label']]
                .apply(lambda x: x.to_dict(orient='records')[0]).reset_index()
@@ -50,11 +50,12 @@ def get_shame_data():
                .to_dict(orient='records')
                )
 
+    conn.close()
     return {'results': records}
 
 
 def generate_shame_score():
-    with open('data/lookup_dictionaries.json') as f:
+    with open('static/lookup_dictionaries.json') as f:
         d = json.load(f)
         print(d)
 

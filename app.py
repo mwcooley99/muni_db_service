@@ -1,12 +1,12 @@
-from flask import Flask, send_from_directory, make_response, jsonify, render_template
+from flask import Flask, send_from_directory, make_response, jsonify, \
+    render_template
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
 import os
 
-
-from scripts.helpers import tz_conversion, get_shame_data
+from scripts.helpers import tz_conversion, get_shame_data, generate_shame_score
 
 import pandas as pd
 
@@ -46,7 +46,7 @@ def hello_world():
     return render_template('index.html', data=data)
 
 
-@app.route('/data')
+@app.route('/static')
 def all_data():
     query = Prediction.query
     df = pd.read_sql(query.statement, query.session.bind)
@@ -70,6 +70,12 @@ def scores():
     resp.headers["Content-Type"] = "application/json"
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
+
+
+@app.route('/test')
+def test():
+    generate_shame_score()
+    return "Hello"
 
 
 if __name__ == '__main__':

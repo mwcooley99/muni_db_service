@@ -67,7 +67,7 @@ def make_prediction(timestamp, stop_data):
 
 
 def tick(url):
-    # Call the API and get data
+    # Call the API and get static
     resp = requests_retry_session().get(url)
     log.info(f'Response code: {resp.status_code}')
 
@@ -75,7 +75,7 @@ def tick(url):
         resp.encoding = 'utf-8-sig'
         json_data = resp.json()
 
-        # Filter the data and create objects
+        # Filter the static and create objects
         routes = ['7', '38', '14', '2', 'M', 'N', 'T', 'K']
         response_time = json_data['ServiceDelivery']['StopMonitoringDelivery'][
             'ResponseTimestamp']
