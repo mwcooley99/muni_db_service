@@ -66,7 +66,11 @@ def all_data():
 
 @app.route('/scores')
 def scores():
-    return jsonify(generate_shame_score())
+    resp = make_response(jsonify(generate_shame_score()))
+    # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
+    resp.headers["Content-Type"] = "application/json"
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 if __name__ == '__main__':
