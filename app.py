@@ -46,7 +46,7 @@ def hello_world():
     return render_template('index.html', data=data)
 
 
-@app.route('/static')
+@app.route('/data')
 def all_data():
     query = Prediction.query
     df = pd.read_sql(query.statement, query.session.bind)
