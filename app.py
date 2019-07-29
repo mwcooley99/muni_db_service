@@ -64,7 +64,10 @@ def all_data():
 
 @app.route('/scores')
 def scores():
-    resp = make_response(jsonify(get_shame_data()))
+    # query = Prediction.query
+    # df = pd.read_sql(query.statement, query.session.bind)
+
+    resp = make_response(jsonify(get_shame_data(db)))
     # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
     resp.headers["Content-Type"] = "application/json"
     resp.headers["Access-Control-Allow-Origin"] = "*"
