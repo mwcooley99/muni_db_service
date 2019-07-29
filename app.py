@@ -74,12 +74,5 @@ def scores():
     return resp
 
 
-@app.route('/test')
-def test():
-    generate_shame_score()
-    return "Hello"
-
-
-
 if __name__ == '__main__':
     app.run(debug=False)
