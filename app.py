@@ -68,7 +68,6 @@ def scores():
     # df = pd.read_sql(query.statement, query.session.bind)
     time = request.args.get('time')
 
-
     resp = make_response(jsonify(get_shame_data(db, time)))
     # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
     resp.headers["Content-Type"] = "application/json"

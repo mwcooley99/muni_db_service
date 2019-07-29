@@ -5,6 +5,7 @@ import pickle
 
 from sklearn.preprocessing import LabelEncoder
 from keras.models import Sequential
+from keras import backend as K
 
 from sqlalchemy import create_engine
 import os
@@ -58,8 +59,10 @@ def get_shame_data(db, time=1.5):
 
 def generate_shame_score(group, time=1.5):
     # Load the model and the lookup tables
+
     with open('static/time_encoder.pkl', "rb") as file_path:
         time_encoder = pickle.load(file_path)
+
 
     with open('static/model_encoder.pkl', 'rb') as file_path:
         model = pickle.load(file_path)
@@ -69,9 +72,10 @@ def generate_shame_score(group, time=1.5):
 
     # Encode the time, if the time isn't in the encoder, give default value
     try:
-        encoded_time = time_encoder.transform([time])
+        encoded_time = time_encoder.transform([float(time)])
     except:
         encoded_time = time_encoder.transform([6.3])
+
     group['time_encoded'] = encoded_time[0]
 
     # encode the data
@@ -92,5 +96,7 @@ def generate_shame_score(group, time=1.5):
 
     results_merged = pd.merge(results, lookup_frames['late_ref'],
                               on='late_class', how='left')
+
+    K.clear_session()
 
     return results_merged['late bin'].values
