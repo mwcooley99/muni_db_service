@@ -1,6 +1,10 @@
 import pytz
 import logging
 import sys
+import pickle
+
+from sklearn.preprocessing import LabelEncoder
+from keras.models import Sequential
 
 from sqlalchemy import create_engine
 import os
@@ -33,8 +37,8 @@ def get_shame_data(db):
         {'min_late': 'mean'}).reset_index()
     group.fillna('n/a', inplace=True)
 
-    group['prediction_label'] = 'tisk tisk'
-    generate_shame_score()
+    group['prediction_label'] = generate_shame_score(group)
+
     records = (group.groupby(['stop_point_ref', 'direction_ref', 'line_ref'])[
                    ['min_late', 'prediction_label']]
                .apply(lambda x: x.to_dict(orient='records')[0]).reset_index()
@@ -52,12 +56,41 @@ def get_shame_data(db):
     return {'results': records}
 
 
-def generate_shame_score():
-    with open('static/lookup_dictionaries.json') as f:
-        d = json.load(f)
-    # print(d)
+def generate_shame_score(group, time=1.5):
+    # Load the model and the lookup tables
+    with open('static/time_encoder.pkl', "rb") as file_path:
+        time_encoder = pickle.load(file_path)
 
+    with open('static/model_encoder.pkl', 'rb') as file_path:
+        model = pickle.load(file_path)
 
-if __name__ == '__main__':
-    # generate_shame_score()
-    print(get_shame_data())
+    with open('static/lookup_frames.pkl', 'rb') as file_path:
+        lookup_frames = pickle.load(file_path)
+
+    # Encode the time, if the time isn't in the encoder, give default value
+    try:
+        encoded_time = time_encoder.transform([time])
+    except:
+        encoded_time = time_encoder.transform([6.3])
+    group['time_encoded'] = encoded_time[0]
+
+    # encode the data
+    group_merged = group
+    refs = ['line_ref', 'direction_ref', 'stop_point_ref']
+    for ref in refs:
+        group_merged = pd.merge(group_merged, lookup_frames[ref], on=ref,
+                                how='left')
+
+    # Get the encoded data
+    model_cols = ['line_encoded', 'direction_encoded', 'stop_encoded',
+                  'time_encoded']
+    data = group_merged[model_cols].values
+
+    # run the model to generate predictions
+    results = pd.DataFrame(data=model.predict_classes(data),
+                           columns=['late_class'])
+
+    results_merged = pd.merge(results, lookup_frames['late_ref'],
+                              on='late_class', how='left')
+
+    return results_merged['late bin'].values
