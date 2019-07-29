@@ -27,7 +27,7 @@ def make_logger():
     return log
 
 
-def get_shame_data(db):
+def get_shame_data(db, time=1.5):
     query = "SELECT line_ref, direction_ref, stop_point_ref, Extract( EPOCH FROM (scheduled_arrival_time - expected_arrival_time)) AS min_late " \
             "FROM predictions"
 
@@ -37,7 +37,7 @@ def get_shame_data(db):
         {'min_late': 'mean'}).reset_index()
     group.fillna('n/a', inplace=True)
 
-    group['prediction_label'] = generate_shame_score(group)
+    group['prediction_label'] = generate_shame_score(group, time)
 
     records = (group.groupby(['stop_point_ref', 'direction_ref', 'line_ref'])[
                    ['min_late', 'prediction_label']]

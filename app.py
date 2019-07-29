@@ -1,5 +1,5 @@
 from flask import Flask, send_from_directory, make_response, jsonify, \
-    render_template
+    render_template, request
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -62,12 +62,14 @@ def all_data():
     return resp
 
 
-@app.route('/scores')
+@app.route('/scores', methods=["GET"])
 def scores():
     # query = Prediction.query
     # df = pd.read_sql(query.statement, query.session.bind)
+    time = request.args.get('time')
 
-    resp = make_response(jsonify(get_shame_data(db)))
+
+    resp = make_response(jsonify(get_shame_data(db, time)))
     # resp.headers["Content-Disposition"] = "attachment; filename=export.csv"
     resp.headers["Content-Type"] = "application/json"
     resp.headers["Access-Control-Allow-Origin"] = "*"
