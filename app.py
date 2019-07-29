@@ -42,8 +42,7 @@ def make_shell_context():
 # Routes
 @app.route('/')
 def hello_world():
-    data = get_shame_data()
-    return render_template('index.html', data=data)
+    return render_template('index.html')
 
 
 @app.route('/data')

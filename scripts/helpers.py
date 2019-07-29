@@ -25,10 +25,10 @@ def make_logger():
 
 def get_shame_data():
     engine = create_engine(os.getenv('DATABASE_URL'))
-    conn = engine.connect()
+    # conn = engine.connect()
     query = "SELECT line_ref, direction_ref, stop_point_ref, Extract( EPOCH FROM (scheduled_arrival_time - expected_arrival_time)) AS min_late " \
             "FROM predictions"
-    df = pd.read_sql(query, conn)
+    df = pd.read_sql(query, engine)
 
     group = df.groupby(['line_ref', 'direction_ref', 'stop_point_ref']).agg(
         {'min_late': 'mean'}).reset_index()
@@ -50,7 +50,7 @@ def get_shame_data():
                .to_dict(orient='records')
                )
 
-    conn.close()
+    # conn.close()
     return {'results': records}
 
 
@@ -61,4 +61,5 @@ def generate_shame_score():
 
 
 if __name__ == '__main__':
-    generate_shame_score()
+    # generate_shame_score()
+    print(get_shame_data())
