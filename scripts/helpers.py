@@ -63,7 +63,6 @@ def generate_shame_score(group, time=1.5):
     with open('static/time_encoder.pkl', "rb") as file_path:
         time_encoder = pickle.load(file_path)
 
-
     with open('static/model_encoder.pkl', 'rb') as file_path:
         model = pickle.load(file_path)
 

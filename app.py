@@ -3,6 +3,7 @@ from flask import Flask, send_from_directory, make_response, jsonify, \
 
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_bootstrap import Bootstrap
 
 import os
 
@@ -24,6 +25,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Add functionality to the app
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+bootstrap = Bootstrap(app)
 
 from models import Prediction
 
