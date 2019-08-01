@@ -126,8 +126,8 @@ if __name__ == "__main__":
 
     @sched.scheduled_job('cron', day_of_week="mon-fri", minute='0-59/20')
     def timed_job():
-        # tick(url)
-        print('he')
+        tick(url)
+
 
     @sched.scheduled_job('cron', minute='15, 45')
     def timed_job():
