@@ -11,8 +11,6 @@ from models import Prediction
 
 from dateutil.parser import parse as parse_date
 
-from scripts.helpers import make_logger
-
 
 def date_parser(date):
     return parse_date(date)
