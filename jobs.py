@@ -96,7 +96,7 @@ def tick(url):
 
 
 def remove_rows():
-    count_query = "SELECT count(*) FROM muni_service.public.predictions"
+    count_query = "SELECT count(*) FROM predictions"
     num_of_rows = db.engine.execute(count_query).first()[0]
 
     num_to_delete = num_of_rows - 9500
@@ -126,8 +126,8 @@ if __name__ == "__main__":
 
     @sched.scheduled_job('cron', day_of_week="mon-fri", minute='0-59/20')
     def timed_job():
-        tick(url)
-
+        # tick(url)
+        print('he')
 
     @sched.scheduled_job('cron', minute='15, 45')
     def timed_job():
