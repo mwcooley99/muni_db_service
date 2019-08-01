@@ -13,8 +13,6 @@ from dateutil.parser import parse as parse_date
 
 from scripts.helpers import make_logger
 
-import pandas as pd
-
 
 def date_parser(date):
     return parse_date(date)
@@ -87,6 +85,7 @@ def tick(url):
                        prediction_results if
                        d['MonitoredVehicleJourney']['LineRef'] in routes]
 
+        # Commit predictions
         db.session.add_all(predictions)
         db.session.commit()
 
@@ -94,10 +93,6 @@ def tick(url):
 
     except KeyError:
         log.error(f'There was an error: {KeyError}')
-
-
-def hello():
-    print("Hello")
 
 
 log = make_logger()
@@ -109,7 +104,7 @@ if __name__ == "__main__":
     url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-    @sched.scheduled_job('cron', minute='0-59/10')
+    @sched.scheduled_job('cron', minute='0-59/20')
     def timed_job():
         tick(url)
 

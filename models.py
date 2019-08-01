@@ -18,3 +18,4 @@ class Prediction(db.Model):
 
 
 
+
