@@ -28,7 +28,7 @@ def make_logger():
     return log
 
 
-def get_shame_data(db, time=1.5):
+def get_shame_data(db, time=7):
     query = "SELECT line_ref, direction_ref, stop_point_ref, Extract( EPOCH FROM (scheduled_arrival_time - expected_arrival_time)) AS min_late " \
             "FROM predictions"
 
