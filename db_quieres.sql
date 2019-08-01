@@ -64,3 +64,5 @@ FROM (
          FROM predictions
      ) AS g
 WHERE g.dow IN (6, 7)
+
+

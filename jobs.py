@@ -95,6 +95,26 @@ def tick(url):
         log.error(f'There was an error: {KeyError}')
 
 
+def remove_rows():
+    count_query = "SELECT count(*) FROM muni_service.public.predictions"
+    num_of_rows = db.engine.execute(count_query).first()[0]
+
+    num_to_delete = num_of_rows - 9500
+
+    if num_to_delete > 0:
+        delete_query = f'''
+        DELETE FROM predictions
+        WHERE ctid in (
+            SELECT ctid
+            FROM predictions
+            ORDER BY ctid
+            LIMIT {num_to_delete}
+            );
+        '''
+        db.engine.execute(delete_query)
+        log.info(f'Deleted {num_to_delete} rows')
+
+
 log = make_logger()
 
 if __name__ == "__main__":
@@ -104,9 +124,14 @@ if __name__ == "__main__":
     url = f"http://api.511.org/transit/StopMonitoring?api_key={API_KEY_511}&agency=SF&format=json"
 
 
-    @sched.scheduled_job('cron', minute='0-59/20')
+    @sched.scheduled_job('cron', day_of_week="mon-fri", minute='0-59/20')
     def timed_job():
         tick(url)
+
+
+    @sched.scheduled_job('cron', minute='15, 45')
+    def timed_job():
+        remove_rows()
 
 
     sched.start()
