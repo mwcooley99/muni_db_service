@@ -3,7 +3,7 @@
 API and cron job for pulling SF MUNI data, running it through a machine learning model, and serving up the results for display.
 
 ## API
-![alt-text]("/images/data.png")
+![alt-text]("https://github.com/mwcooley99/muni_db_service/blob/master/images/data.png")
 
 ## Built With
 
